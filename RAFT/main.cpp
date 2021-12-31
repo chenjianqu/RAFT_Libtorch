@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
     }
 
     Tensor flow;
+    Tensor tensor0 = Pipeline::process(img0);//(1,3,376, 1232),值大小从-1到1
+
 
     for(int index=1; index <1000;++index)
     {
@@ -55,8 +57,6 @@ int main(int argc, char **argv) {
             break;
         }
         ticToc.tic();
-
-        Tensor tensor0 = Pipeline::process(img0);//(1,3,376, 1232),值大小从-1到1
         Tensor tensor1 = Pipeline::process(img1);//(1,3,376, 1232)
 
         debug_s("process:{} ms",ticToc.toc_then_tic());
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
         debug_s("prediction:{} ms",ticToc.toc_then_tic());
 
-        torch::Tensor output = (tensor1.squeeze()+1.)/2.;
+        torch::Tensor tensor1_raw = (tensor1.squeeze()+1.)/2.;
         flow = prediction.back();//[1,2,h,w]
         flow = flow.squeeze();
 
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
         debug_s(msg);
 
 
-        cv::Mat flow_show = visual_flow_image(output,flow);
+        cv::Mat flow_show = visual_flow_image(tensor1_raw,flow);
         //cv::Mat flow_show = visual_flow_image(flow);
 
         cv::imshow("flow",flow_show);
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
         else if(order==' ')
             cv::waitKey(0);
 
-        img0 = img1;
+        tensor0 = tensor1;
     }
 
 
