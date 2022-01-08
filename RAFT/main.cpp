@@ -10,15 +10,14 @@
 
 #include <iostream>
 #include <memory>
-
-
+#include <filesystem>
 #include "src/Config.h"
 #include "src/utils.h"
 #include "src/Pipeline.h"
 #include "src/Visualization.h"
 #include "src/RAFT_Torch.h"
 
-
+namespace fs = std::filesystem;
 
 cv::Mat ReadOneKitti(int index){
     char name[64];
@@ -28,6 +27,20 @@ cv::Mat ReadOneKitti(int index){
     return cv::imread(img0_path);
 }
 
+
+vector<fs::path> ReadImagesNames(const string &path){
+    fs::path dir_path(path);
+    vector<fs::path> names;
+    if(!fs::exists(dir_path))
+        return names;
+    fs::directory_iterator dir_iter(dir_path);
+    for(auto &it : dir_iter){
+        names.push_back(it.path());
+    }
+    return names;
+}
+
+
 int main(int argc, char **argv) {
     if(argc != 2){
         cerr<<"please input: [config file]"<<endl;
@@ -35,6 +48,7 @@ int main(int argc, char **argv) {
     }
     string config_file = argv[1];
     fmt::print("config_file:{}\n",argv[1]);
+    //RAFT_TorchScript::Ptr raft_torchscript;
     RAFT_Torch::Ptr raft_torch;
     try{
         Config cfg(config_file);
@@ -46,14 +60,14 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    TicToc ticToc;
+    TicToc tt;
+
+    auto names = ReadImagesNames(Config::DATASET_DIR);
+    std::sort(names.begin(),names.end());
 
     cv::Mat img0,img1;
-    img0 = ReadOneKitti(0);
-    if(img0.empty()){
-        cerr<<"无法读取图片"<<endl;
-        return -1;
-    }
+    img0 = cv::imread(names[0].string());
+
 
     Tensor flow;
     Tensor tensor0 = Pipeline::process(img0);//(1,3,376, 1232),值大小从-1到1
@@ -61,39 +75,24 @@ int main(int argc, char **argv) {
 
     for(int index=1; index <1000;++index)
     {
-        img1 = ReadOneKitti(index);
+        img1 = cv::imread(names[index].string());
+        fmt::print(names[index].string()+"\n");
         if(img1.empty()){
             cerr<<"Read image:"<<index<<" failure"<<endl;
             break;
         }
-        ticToc.tic();
+        tt.Tic();
         Tensor tensor1 = Pipeline::process(img1);//(1,3,376, 1232)
 
-        debug_s("process:{} ms",ticToc.toc_then_tic());
+        Debugs("process:{} ms", tt.TocThenTic());
 
-        vector<Tensor> prediction = raft_torch->forward(tensor0,tensor1);
+        vector<Tensor> prediction = raft_torch->Forward(tensor0, tensor1);
 
-        debug_s("prediction:{} ms",ticToc.toc_then_tic());
-
+        Debugs("prediction:{} ms", tt.TocThenTic());
+/*
         torch::Tensor tensor1_raw = (tensor1.squeeze()+1.)/2.;
         flow = prediction.back();//[1,2,h,w]
         flow = flow.squeeze();
-
-        string msg;
-        int cnt=0;
-        for(int i=0;i<flow.sizes()[1];++i){
-            for(int j=0;j<flow.sizes()[2];++j){
-                if(i==j){
-                    cnt++;
-                    msg+=fmt::format("({},{}:{:.2f},{:.2f})  ",i,j,
-                                     flow.index({0,i,j}).item().toFloat(),
-                                     flow.index({1,i,j}).item().toFloat());
-                    if(cnt%5==0)msg+="\n";
-                }
-            }
-        }
-        debug_s(msg);
-
 
         cv::Mat flow_show = visual_flow_image(tensor1_raw,flow);
         //cv::Mat flow_show = visual_flow_image(flow);
@@ -102,7 +101,7 @@ int main(int argc, char **argv) {
         if(auto order=(cv::waitKey(100) & 0xFF); order == 'q')
             break;
         else if(order==' ')
-            cv::waitKey(0);
+            cv::waitKey(0);*/
 
         tensor0 = tensor1;
     }

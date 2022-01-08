@@ -30,32 +30,32 @@
 class TicToc{
 public:
     TicToc(){
-        tic();
+        Tic();
     }
 
-    void tic(){
-        start = std::chrono::system_clock::now();
+    void Tic(){
+        start_ = std::chrono::system_clock::now();
     }
 
-    double toc(){
-        end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
+    double Toc(){
+        end_ = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end_ - start_;
         return elapsed_seconds.count() * 1000;
     }
 
-    double toc_then_tic(){
-        auto t=toc();
-        tic();
+    double TocThenTic(){
+        auto t= Toc();
+        Tic();
         return t;
     }
 
-    void toc_print_tic(const char* str){
-        std::cout<<str<<":"<<toc()<<" ms"<<std::endl;
-        tic();
+    void TocPrintTic(const char* str){
+        std::cout << str << ":" << Toc() << " ms" << std::endl;
+        Tic();
     }
 
 private:
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::time_point<std::chrono::system_clock> start_, end_;
 };
 
 
@@ -66,7 +66,7 @@ class utils {
 
 
 template <typename T>
-static std::string dims2str(torch::ArrayRef<T> list){
+static std::string DimsToStr(torch::ArrayRef<T> list){
     int i = 0;
     std::string text= "[";
     for(auto e : list) {
@@ -78,7 +78,7 @@ static std::string dims2str(torch::ArrayRef<T> list){
 }
 
 
-static std::string dims2str(nvinfer1::Dims list){
+static std::string DimsToStr(nvinfer1::Dims list){
     std::string text= "[";
     for(int i=0;i<list.nbDims;++i){
         if (i > 0) text+= ", ";
@@ -96,7 +96,7 @@ inline cv::Point2f operator*(const cv::Point2f &lp,const cv::Point2f &rp)
 }
 
 template<typename MatrixType>
-inline std::string eigen2str(const MatrixType &m){
+inline std::string EigenToStr(const MatrixType &m){
     std::string text;
     for(int i=0;i<m.rows();++i){
         for(int j=0;j<m.cols();++j){
@@ -110,8 +110,8 @@ inline std::string eigen2str(const MatrixType &m){
 
 
 template<typename T>
-inline std::string vec2str(const Eigen::Matrix<T,3,1> &vec){
-    return eigen2str(vec.transpose());
+inline std::string VecToStr(const Eigen::Matrix<T,3,1> &vec){
+    return EigenToStr(vec.transpose());
 }
 
 

@@ -41,17 +41,17 @@ namespace fs=std::filesystem;
 inline std::shared_ptr<spdlog::logger> sgLogger;
 
 template <typename Arg1, typename... Args>
-inline void debug_s(const char* fmt, const Arg1 &arg1, const Args&... args){ sgLogger->log(spdlog::level::debug, fmt, arg1, args...);}
+inline void Debugs(const char* fmt, const Arg1 &arg1, const Args&... args){ sgLogger->log(spdlog::level::debug, fmt, arg1, args...);}
 template<typename T>
-inline void debug_s(const T& msg){sgLogger->log(spdlog::level::debug, msg); }
+inline void Debugs(const T& msg){sgLogger->log(spdlog::level::debug, msg); }
 template <typename Arg1, typename... Args>
-inline void info_s(const char* fmt, const Arg1 &arg1, const Args&... args){sgLogger->log(spdlog::level::info, fmt, arg1, args...);}
+inline void Infos(const char* fmt, const Arg1 &arg1, const Args&... args){sgLogger->log(spdlog::level::info, fmt, arg1, args...);}
 template<typename T>
-inline void info_s(const T& msg){sgLogger->log(spdlog::level::info, msg);}
+inline void Infos(const T& msg){sgLogger->log(spdlog::level::info, msg);}
 template <typename Arg1, typename... Args>
-inline void warn_s(const char* fmt, const Arg1 &arg1, const Args&... args){sgLogger->log(spdlog::level::warn, fmt, arg1, args...);}
+inline void Warns(const char* fmt, const Arg1 &arg1, const Args&... args){sgLogger->log(spdlog::level::warn, fmt, arg1, args...);}
 template<typename T>
-inline void warn_s(const T& msg){sgLogger->log(spdlog::level::warn, msg);}
+inline void Warns(const T& msg){sgLogger->log(spdlog::level::warn, msg);}
 
 
 class Config {

@@ -1,7 +1,12 @@
 # RAFT_Libtorch
 这是光流算法RAFT的Libtorch实现。
 
-**目前存在：显存泄漏问题 的bug,  解决中。**
+目前使用两种方式将pytorch模型转换为libtorch模型。  
+一种使用torchscript编译的方法，对应代码中`RAFT_TorchScript类`。  
+另一种使用trace的方法，对应代码中的`RAFT_Torch类`。由于RAFT中存在分支和循环语句，因此这种方法需要分别
+将RAFT中三个子网络分别trace。  
+这两种方法所需要的显存均非常大，在我的2070显卡（8G现存）上都会出现
+显存不够的情况。
 
 ## Quick Start
 * **1.编译TorchScript模型**

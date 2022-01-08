@@ -36,11 +36,11 @@ torch::Tensor Pipeline::process(cv::Mat &img)
         input_tensor.index({"...",1}).unsqueeze(2),
         input_tensor.index({"...",0}).unsqueeze(2)
         },2);
-    debug_s("setInputTensorCuda bgr->rgb:{} {} ms",dims2str(input_tensor.sizes()),tt.toc_then_tic());
+    Debugs("setInputTensorCuda bgr->rgb:{} {} ms", DimsToStr(input_tensor.sizes()), tt.TocThenTic());
 
     ///hwc->chw
     input_tensor = input_tensor.permute({2,0,1});
-    debug_s("setInputTensorCuda hwc->chw:{} {} ms",dims2str(input_tensor.sizes()),tt.toc_then_tic());
+    Debugs("setInputTensorCuda hwc->chw:{} {} ms", DimsToStr(input_tensor.sizes()), tt.TocThenTic());
 
     ///pad
     int h_pad = ((int(h/8)+1)*8 - h)%8;

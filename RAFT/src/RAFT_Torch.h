@@ -22,18 +22,42 @@
 using Tensor = torch::Tensor;
 
 
-class RAFT_Torch {
+class RAFT_TorchScript {
+public:
+    using Ptr = std::unique_ptr<RAFT_TorchScript>;
+    RAFT_TorchScript();
+    vector<Tensor> Forward(Tensor& tensor0, Tensor& tensor1);
+private:
+    std::shared_ptr<torch::jit::Module> raft;
+};
+
+
+
+class RAFT_Torch{
 public:
     using Ptr = std::unique_ptr<RAFT_Torch>;
 
     RAFT_Torch();
-    vector<Tensor> forward(Tensor& tensor0, Tensor& tensor1);
 
+    vector<Tensor> Forward(Tensor& tensor0, Tensor& tensor1);
 
 private:
-    std::shared_ptr<torch::jit::Module> raft;
+    tuple<Tensor,Tensor> ForwardFnet(Tensor &tensor0, Tensor &tensor1);
+    tuple<Tensor,Tensor> ForwardCnet(Tensor &tensor);
+    tuple<Tensor,Tensor,Tensor> ForwardUpdate(Tensor &net, Tensor &inp, Tensor &corr, Tensor &flow);
+    static tuple<Tensor,Tensor> InitializeFlow(Tensor &tensor);
+    void ComputeCorrPyramid(Tensor &tensor0, Tensor &tensor1);
+    Tensor IndexCorrVolume(Tensor &tensor);
 
+    Tensor last_flow;
+    vector<Tensor> corr_pyramid; //相关性金字塔
+
+    std::shared_ptr<torch::jit::Module> fnet_;
+    std::shared_ptr<torch::jit::Module> cnet_;
+    std::shared_ptr<torch::jit::Module> update_;
 };
+
+
 
 
 #endif //RAFT_CPP_RAFT_TORCH_H
